@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="first">#432C7A</color>
+    <color name="second">#80489C</color>
+    <color name="third">#80489C</color>
+    <color name="forth">#FCE2DB</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>
