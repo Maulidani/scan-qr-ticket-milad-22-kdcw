@@ -6,8 +6,8 @@ class Model {
         val message: String,
         val errors: Boolean,
         val data: ArrayList<DataModel>,
-//        val status: ArrayList<StatusModel>,
-//        val ticket_category: ArrayList<TicketCategory>,
+        val status: ArrayList<StatusModel>,
+        val ticket_category: ArrayList<TicketCategory>,
     )
     data class DataModel(
         val url: String,

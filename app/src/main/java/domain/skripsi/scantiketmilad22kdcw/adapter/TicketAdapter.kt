@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import domain.skripsi.scantiketmilad22kdcw.R
 import domain.skripsi.scantiketmilad22kdcw.model.Model
 import domain.skripsi.scantiketmilad22kdcw.ui.DetailTicketActivity
+import domain.skripsi.scantiketmilad22kdcw.util.PreferencesHelper
 
 class TicketAdapter(
     private val type: String,
@@ -25,6 +27,8 @@ class TicketAdapter(
 
     inner class ListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
+        private lateinit var sharedPref: PreferencesHelper
+
         private val ticketNumber: TextView by lazy { itemView.findViewById(R.id.tvNumberTicket) }
         private val ticketType: TextView by lazy { itemView.findViewById(R.id.tvTicketCategory) }
         private val ticketStatus: TextView by lazy { itemView.findViewById(R.id.tvStatusTicket) }
@@ -35,7 +39,7 @@ class TicketAdapter(
 
         fun bindData(list: Model.DataModel) {
 
-            ticketNumber.text = "#"+list.id
+            ticketNumber.text = "#" + list.id
             ticketType.text = list.ticket
             when (list.status) {
                 "attend" -> {
@@ -53,18 +57,20 @@ class TicketAdapter(
             }
             fullName.text = list.customer_name
             nra.text = list.customer_nra
-            campus.text = "KD : "+list.customer_campus
+            campus.text = "KD : " + list.customer_campus
 
             item.setOnClickListener {
-               optionAlert(list)
+                optionAlert(list)
 
             }
         }
 
         private fun optionAlert(list: Model.DataModel) {
+            sharedPref = PreferencesHelper(itemView.context)
+
             val builder: AlertDialog.Builder = AlertDialog.Builder(itemView.context)
 
-            val options = arrayOf("Lihat detail", "Sudah bayar", "Batalkan pembayaran", "Hapus pesanan")
+            val options = arrayOf("Lihat detail", "Edit pesanan", "Hapus pesanan")
             builder.setItems(
                 options
             ) { _, which ->
@@ -73,47 +79,37 @@ class TicketAdapter(
                         ContextCompat.startActivity(
                             itemView.context,
                             Intent(itemView.context, DetailTicketActivity::class.java)
-                                .putExtra("url",list.url)
-                                .putExtra("id",list.id)
-                                .putExtra("ticket",list.ticket)
-                                .putExtra("customer_name",list.customer_name)
-                                .putExtra("customer_nra",list.customer_nra)
-                                .putExtra("customer_phone",list.customer_phone)
-                                .putExtra("customer_email",list.customer_email)
-                                .putExtra("customer_address",list.customer_address)
-                                .putExtra("customer_campus",list.customer_campus)
-                                .putExtra("merchandise",list.merchandise)
-                                .putExtra("status",list.status)
-                            , null
+                                .putExtra("url", list.url)
+                                .putExtra("id", list.id)
+                                .putExtra("ticket", list.ticket)
+                                .putExtra("customer_name", list.customer_name)
+                                .putExtra("customer_nra", list.customer_nra)
+                                .putExtra("customer_phone", list.customer_phone)
+                                .putExtra("customer_email", list.customer_email)
+                                .putExtra("customer_address", list.customer_address)
+                                .putExtra("customer_campus", list.customer_campus)
+                                .putExtra("merchandise", list.merchandise)
+                                .putExtra("status", list.status), null
                         )
                     }
                     1 -> {
-                        val builder = AlertDialog.Builder(itemView.context)
-                        builder.setTitle("Sudah bayar")
-                        builder.setMessage("pesanan tiket ${list.customer_name} ?")
-
-                        builder.setPositiveButton("Ya") { _, _ ->
-//                            paid(list.id)
+                        val builderEdit: AlertDialog.Builder = AlertDialog.Builder(itemView.context)
+                        val optionsEdit = sharedPref.getStringSet(PreferencesHelper.PREF_STATUS_TICKET)?.toTypedArray()
+                        builderEdit.setItems(
+                            optionsEdit
+                        ) { _, whichEdit ->
+                            for (i in 0..optionsEdit!!.size) {
+                                when (whichEdit) {
+                                    i->{
+                                        val idStatusTicket = optionsEdit[i].split(".").toTypedArray()
+                                        Toast.makeText(itemView.context, optionsEdit[i], Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(itemView.context, idStatusTicket[0], Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(itemView.context, list.id+":"+list.ticket, Toast.LENGTH_SHORT).show()}
+                                }
+                            }
                         }
-
-                        builder.setNegativeButton("Tidak") { _, _ ->
-                            // cancel
-                        }
-                        builder.show()
-                    }
-                    2 -> {
-                        val builder = AlertDialog.Builder(itemView.context)
-                        builder.setTitle("Batalkan pembayaran")
-                        builder.setMessage("pesanan tiket ${list.customer_name} ?")
-
-                        builder.setPositiveButton("Ya") { _, _ ->
-//                            pending(list.id)
-                        }
-
-                        builder.setNegativeButton("Tidak") { _, _ ->
-                            // cancel
-                        }
-                        builder.show()
+                        val dialogEdit: AlertDialog = builderEdit.create()
+                        dialogEdit.show()
                     }
                     3 -> {
 //                        val builder = AlertDialog.Builder(itemView.context)
@@ -133,6 +129,7 @@ class TicketAdapter(
             }
             val dialog: AlertDialog = builder.create()
             dialog.show()
+
         }
 
 //        private fun delete(id: String) {

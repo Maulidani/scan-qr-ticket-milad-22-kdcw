@@ -28,7 +28,6 @@ interface ApiService {
         @Field("status_id") statusId: String,
     ): Call<Model.ResponseModel>
 
-    @FormUrlEncoded
     @POST("get-data")
     fun getData(): Call<Model.ResponseModel>
 

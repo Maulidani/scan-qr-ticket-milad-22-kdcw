@@ -32,7 +32,7 @@ class DetailTicketActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail_ticket)
 
-        when (intent.getStringExtra("istatus")) {
+        when (intent.getStringExtra("status")) {
             "attend" -> {
                 ticketStatus.text = "Hadir"
                 ticketStatus.setTextColor(Color.GREEN)
@@ -59,6 +59,10 @@ class DetailTicketActivity : AppCompatActivity() {
         tshirtType.visibility = View.GONE
         tshirtSize.visibility = View.GONE
         ticketLink.text = intent.getStringExtra("url")
+
+        imgBack.setOnClickListener {
+            finish()
+        }
 
     }
 
