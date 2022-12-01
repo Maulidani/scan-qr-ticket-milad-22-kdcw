@@ -15,7 +15,7 @@ interface ApiService {
     ): Call<Model.ResponseModel>
 
     @FormUrlEncoded
-    @POST("edit-tickets")
+    @POST("edit-ticket")
     fun editTicket(
         @Field("ticket_id") ticketId: String,
         @Field("status_id") statusId: String,

@@ -52,6 +52,7 @@ dependencies {
     // define any required OkHttp artifacts without version
     implementation("com.squareup.okhttp3:okhttp")
     implementation("com.squareup.okhttp3:logging-interceptor")
+
     implementation 'androidx.navigation:navigation-runtime-ktx:2.4.2'
 
     //coroutine

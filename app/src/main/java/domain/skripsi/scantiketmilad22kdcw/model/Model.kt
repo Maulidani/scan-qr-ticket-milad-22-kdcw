@@ -6,6 +6,7 @@ class Model {
         val message: String,
         val errors: Boolean,
         val data: ArrayList<DataModel>,
+        val ticket: DataModel,
         val status: ArrayList<StatusModel>,
         val ticket_category: ArrayList<TicketCategory>,
     )

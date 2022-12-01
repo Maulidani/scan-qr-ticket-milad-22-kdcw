@@ -1,7 +1,9 @@
 package domain.skripsi.scantiketmilad22kdcw.adapter
 
+import android.content.ContentValues
 import android.content.Intent
 import android.graphics.Color
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,8 +15,12 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import domain.skripsi.scantiketmilad22kdcw.R
 import domain.skripsi.scantiketmilad22kdcw.model.Model
+import domain.skripsi.scantiketmilad22kdcw.network.ApiClient
 import domain.skripsi.scantiketmilad22kdcw.ui.DetailTicketActivity
 import domain.skripsi.scantiketmilad22kdcw.util.PreferencesHelper
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class TicketAdapter(
     private val type: String,
@@ -61,7 +67,6 @@ class TicketAdapter(
 
             item.setOnClickListener {
                 optionAlert(list)
-
             }
         }
 
@@ -70,7 +75,7 @@ class TicketAdapter(
 
             val builder: AlertDialog.Builder = AlertDialog.Builder(itemView.context)
 
-            val options = arrayOf("Lihat detail", "Edit pesanan", "Hapus pesanan")
+            val options = arrayOf("Lihat detail", "Ganti status pesanan", "Hapus pesanan")
             builder.setItems(
                 options
             ) { _, which ->
@@ -94,17 +99,18 @@ class TicketAdapter(
                     }
                     1 -> {
                         val builderEdit: AlertDialog.Builder = AlertDialog.Builder(itemView.context)
-                        val optionsEdit = sharedPref.getStringSet(PreferencesHelper.PREF_STATUS_TICKET)?.toTypedArray()
+                        val optionsEdit =
+                            sharedPref.getStringSet(PreferencesHelper.PREF_STATUS_TICKET)
+                                ?.toTypedArray()
                         builderEdit.setItems(
                             optionsEdit
                         ) { _, whichEdit ->
                             for (i in 0..optionsEdit!!.size) {
                                 when (whichEdit) {
-                                    i->{
+                                    i -> {
                                         val idStatusTicket = optionsEdit[i].split(".").toTypedArray()
-                                        Toast.makeText(itemView.context, optionsEdit[i], Toast.LENGTH_SHORT).show()
-                                        Toast.makeText(itemView.context, idStatusTicket[0], Toast.LENGTH_SHORT).show()
-                                        Toast.makeText(itemView.context, list.id+":"+list.ticket, Toast.LENGTH_SHORT).show()}
+                                        editPesanan(list.id, idStatusTicket[0])
+                                    }
                                 }
                             }
                         }
@@ -132,38 +138,46 @@ class TicketAdapter(
 
         }
 
-//        private fun delete(id: String) {
-//
-//            ApiClient.instances.deleteProduct(id, userId)
-//                .enqueue(object : Callback<Model.ResponseModel> {
-//                    override fun onResponse(
-//                        call: Call<Model.ResponseModel>,
-//                        response: Response<Model.ResponseModel>
-//                    ) {
-//                        val responseBody = response.body()
-//                        val message = responseBody?.message
-//
-//                        if (response.isSuccessful && message == "Success") {
-//                            Toast.makeText(itemView.context, "Berhasil hapus produk", Toast.LENGTH_SHORT).show()
-//                            mListener.refreshView(true)
-//                            notifyDataSetChanged()
-//
-//                        } else {
-//                            Toast.makeText(itemView.context, "Gagal", Toast.LENGTH_SHORT)
-//                                .show()
-//                        }
-//                    }
-//
-//                    override fun onFailure(call: Call<Model.ResponseModel>, t: Throwable) {
-//                        Toast.makeText(
-//                            itemView.context,
-//                            t.message.toString(),
-//                            Toast.LENGTH_SHORT
-//                        ).show()
-//                    }
-//
-//                })
-//        }
+        private fun editPesanan(ticketId: String, statusId: String) {
+
+            ApiClient.instances.editTicket(ticketId, statusId)
+                .enqueue(object : Callback<Model.ResponseModel> {
+                    override fun onResponse(
+                        call: Call<Model.ResponseModel>,
+                        response: Response<Model.ResponseModel>
+                    ) {
+                        val responseBody = response.body()
+                        val message = responseBody?.message
+
+                        if (response.isSuccessful && message == "Success") {
+                            Log.e(itemView.context.toString(), "onResponse: $response")
+
+                            Toast.makeText(
+                                itemView.context,
+                                "Berhasil ganti pesanan",
+                                Toast.LENGTH_SHORT
+                            ).show()
+
+                            mListener.refreshView(true)
+                            notifyDataSetChanged()
+
+                        } else {
+                            Log.e(itemView.context.toString(), "onResponse: $response")
+
+                            Toast.makeText(itemView.context, "Gagal", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                    }
+
+                    override fun onFailure(call: Call<Model.ResponseModel>, t: Throwable) {
+                        Log.e(itemView.context.toString(), "onFailure: ${t.message}")
+
+                        Toast.makeText(itemView.context, "Terjadi Kesalahan", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+
+                })
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListViewHolder {

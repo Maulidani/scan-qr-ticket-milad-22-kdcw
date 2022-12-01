@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -31,7 +32,6 @@ class HomeFragment : Fragment(), TicketAdapter.IUserRecycler {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
         getTicket("")
     }
 
@@ -51,7 +51,7 @@ class HomeFragment : Fragment(), TicketAdapter.IUserRecycler {
                         val data = responseBody?.data
 
                         if (response.isSuccessful && message == "Success" && isAdded) {
-                            Log.e(TAG, "onResponse: $response")
+                            Log.e(requireContext().toString(), "onResponse: $response")
 
                             val adapterNewProduct =
                                 data?.let { TicketAdapter("home", it, this@HomeFragment) }
@@ -59,14 +59,19 @@ class HomeFragment : Fragment(), TicketAdapter.IUserRecycler {
                             rvTicket.adapter = adapterNewProduct
 
                         } else {
-                            Log.e(TAG, "onResponse: $response")
+                            Log.e(requireContext().toString(), "onResponse: $response")
 
+                            Toast.makeText(requireContext(), "Gagal", Toast.LENGTH_SHORT)
+                                .show()
                         }
 
                     }
 
                     override fun onFailure(call: Call<Model.ResponseModel>, t: Throwable) {
-                        Log.e(TAG, "onResponse: ${t.message}")
+                        Log.e(requireContext().toString(), "onFailure: ${t.message}")
+
+                        Toast.makeText(requireContext(), "Terjadi kesalahan", Toast.LENGTH_SHORT)
+                            .show()
 
                     }
 
@@ -75,7 +80,9 @@ class HomeFragment : Fragment(), TicketAdapter.IUserRecycler {
     }
 
     override fun refreshView(onUpdate: Boolean) {
-        //
+        if (isAdded && onUpdate) {
+            getTicket("")
+        }
     }
 
 }

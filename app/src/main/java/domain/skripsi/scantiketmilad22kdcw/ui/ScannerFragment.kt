@@ -1,6 +1,7 @@
 package domain.skripsi.scantiketmilad22kdcw.ui
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,6 +10,7 @@ import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
 import cn.pedant.SweetAlert.SweetAlertDialog
 import com.budiyev.android.codescanner.CodeScanner
 import com.budiyev.android.codescanner.CodeScannerView
@@ -16,6 +18,12 @@ import com.budiyev.android.codescanner.DecodeCallback
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import domain.skripsi.scantiketmilad22kdcw.R
+import domain.skripsi.scantiketmilad22kdcw.adapter.TicketAdapter
+import domain.skripsi.scantiketmilad22kdcw.model.Model
+import domain.skripsi.scantiketmilad22kdcw.network.ApiClient
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 
 class ScannerFragment : Fragment() {
@@ -50,12 +58,7 @@ class ScannerFragment : Fragment() {
         codeScanner.decodeCallback = DecodeCallback { result ->
 
             requireActivity().runOnUiThread(Runnable {
-//                scanner(result.text)
-                Toast.makeText(requireContext().applicationContext, result.text, Toast.LENGTH_LONG)
-                    .show()
-
-                if (isAdded) showDialog("Success")
-
+                scanAttend(result.text)
             })
 
         }
@@ -84,23 +87,71 @@ class ScannerFragment : Fragment() {
         super.onPause()
     }
 
-    private fun showDialog(status: String) {
-        pbLoading.visibility = View.VISIBLE
-        pbLoading.visibility = View.INVISIBLE
-
+    private fun showDialog(status: String, customerName: String) {
         if (status == "Success") {
             val pDialog =
                 SweetAlertDialog(requireView().context, SweetAlertDialog.SUCCESS_TYPE)
-            pDialog.titleText = status
-            pDialog.contentText = "Berhasil Scan"
+            pDialog.titleText = "Sukses scan hadir"
+            pDialog.contentText = customerName
             pDialog.setCancelable(false)
             pDialog.show()
+
         } else {
             val pDialog =
                 SweetAlertDialog(requireView().context, SweetAlertDialog.ERROR_TYPE)
-            pDialog.titleText = status
+            pDialog.titleText = "Gagal"
+            pDialog.contentText = "Tiket tidak terdaftar"
             pDialog.setCancelable(false)
             pDialog.show()
+        }
+    }
+
+    private fun scanAttend(nraCampus: String) {
+        if (isAdded) {
+            pbLoading.visibility = View.VISIBLE
+
+            ApiClient.instances.scanTicketAttend(nraCampus, "3")
+                .enqueue(object : Callback<Model.ResponseModel> {
+                    override fun onResponse(
+                        call: Call<Model.ResponseModel>,
+                        response: Response<Model.ResponseModel>
+                    ) {
+                        val responseBody = response.body()
+                        val message = responseBody?.message
+                        val ticket = responseBody?.ticket
+
+                        if (response.isSuccessful && message == "Success" && isAdded) {
+                            Log.e(requireContext().toString(), "onResponse: $response")
+
+                            ticket?.customer_name?.let { showDialog(message, it) }
+
+                        } else if (message == "Attend") {
+                            Log.e(requireContext().toString(), "onResponse: $response")
+
+                            Toast.makeText(requireContext(), "Sudah hadir", Toast.LENGTH_SHORT)
+                                .show()
+
+                        } else {
+                            Log.e(requireContext().toString(), "onResponse: $response")
+
+                            showDialog("Failed", "")
+                        }
+
+                        pbLoading.visibility = View.INVISIBLE
+
+                    }
+
+                    override fun onFailure(call: Call<Model.ResponseModel>, t: Throwable) {
+                        Log.e(requireContext().toString(), "onFailure: ${t.message}")
+
+                        Toast.makeText(requireContext(), "Terjadi kesalahan", Toast.LENGTH_SHORT)
+                            .show()
+
+                        pbLoading.visibility = View.INVISIBLE
+
+                    }
+
+                })
         }
     }
 
