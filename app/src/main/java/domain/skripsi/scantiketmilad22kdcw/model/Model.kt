@@ -9,6 +9,8 @@ class Model {
         val ticket: DataModel,
         val status: ArrayList<StatusModel>,
         val ticket_category: ArrayList<TicketCategory>,
+        val total:Int,
+        val total_paid:Int,
     )
     data class DataModel(
         val url: String,

@@ -1,17 +1,23 @@
 package domain.skripsi.scantiketmilad22kdcw.ui
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.cardview.widget.CardView
 import com.google.android.material.button.MaterialButton
 import domain.skripsi.scantiketmilad22kdcw.R
+import domain.skripsi.scantiketmilad22kdcw.util.Constant.Companion.BASE_URL
 
 class DetailTicketActivity : AppCompatActivity() {
-    private val imgBack:ImageView by lazy { findViewById(R.id.imgBack) }
+    private val imgBack: ImageView by lazy { findViewById(R.id.imgBack) }
+    private val imgCopy: ImageView by lazy { findViewById(R.id.imgCopy) }
     private val ticketNumber: TextView by lazy { findViewById(R.id.tvNumberTicket) }
     private val ticketType: TextView by lazy { findViewById(R.id.tvTicketCategory) }
     private val ticketStatus: TextView by lazy { findViewById(R.id.tvStatusTicket) }
@@ -36,17 +42,21 @@ class DetailTicketActivity : AppCompatActivity() {
             "attend" -> {
                 ticketStatus.text = "Hadir"
                 ticketStatus.setTextColor(Color.GREEN)
+                ticketLink.text = BASE_URL + "/" + intent.getStringExtra("url")
             }
             "paid" -> {
                 ticketStatus.text = "Sudah bayar"
                 ticketStatus.setTextColor(Color.GREEN)
+                ticketLink.text = BASE_URL + "/" + intent.getStringExtra("url")
             }
             else -> {
+                ticketLink.text = "-"
+
                 ticketStatus.text = "Belum bayar"
                 ticketStatus.setTextColor(Color.RED)
             }
         }
-        ticketNumber.text = "#"+intent.getStringExtra("id")
+        ticketNumber.text = "#" + intent.getStringExtra("id")
         ticketType.text = intent.getStringExtra("ticket")
         fullName.text = intent.getStringExtra("customer_name")
         nra.text = intent.getStringExtra("customer_nra")
@@ -58,10 +68,20 @@ class DetailTicketActivity : AppCompatActivity() {
         tshirt.text = intent.getStringExtra("merchandise")
         tshirtType.visibility = View.GONE
         tshirtSize.visibility = View.GONE
-        ticketLink.text = intent.getStringExtra("url")
 
         imgBack.setOnClickListener {
             finish()
+        }
+
+        imgCopy.setOnClickListener {
+            val textToCopy = ticketLink.text.toString()
+            val clipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clipData = ClipData.newPlainText("Link ticket", textToCopy)
+            clipboardManager.setPrimaryClip(clipData)
+
+            Toast.makeText(applicationContext, "Text copied to clipboard", Toast.LENGTH_SHORT)
+                .show()
+
         }
 
     }

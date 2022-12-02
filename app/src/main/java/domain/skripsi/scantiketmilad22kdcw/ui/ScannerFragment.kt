@@ -138,6 +138,7 @@ class ScannerFragment : Fragment() {
                         }
 
                         pbLoading.visibility = View.INVISIBLE
+                        codeScanner.startPreview()
 
                     }
 
@@ -148,6 +149,7 @@ class ScannerFragment : Fragment() {
                             .show()
 
                         pbLoading.visibility = View.INVISIBLE
+                        codeScanner.startPreview()
 
                     }
 

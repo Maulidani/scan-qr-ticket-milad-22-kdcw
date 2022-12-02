@@ -1,12 +1,14 @@
 package domain.skripsi.scantiketmilad22kdcw.ui
 
-import android.content.ContentValues.TAG
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
+import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,6 +22,10 @@ import retrofit2.Response
 
 class HomeFragment : Fragment(), TicketAdapter.IUserRecycler {
     private lateinit var rvTicket: RecyclerView
+    private lateinit var cardTicketSale: CardView
+    private lateinit var cardTicketPaid: CardView
+    private lateinit var tvSaleCount: TextView
+    private lateinit var tvPaidCount: TextView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -32,13 +38,31 @@ class HomeFragment : Fragment(), TicketAdapter.IUserRecycler {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        init()
         getTicket("")
     }
 
+    private fun init(){
+        if (isAdded) {
+            rvTicket = requireView().findViewById(R.id.tvTicketNew)
+            tvSaleCount = requireView().findViewById(R.id.tvSale)
+            tvPaidCount = requireView().findViewById(R.id.tvPaid)
+            cardTicketSale = requireView().findViewById(R.id.cardTicketSale)
+            cardTicketPaid = requireView().findViewById(R.id.cardTicketPaid)
+
+            cardTicketSale.setOnClickListener {
+                startActivity(Intent(requireContext(), ListTicketActivity::class.java)
+                    .putExtra("status", "sale"))
+            }
+            cardTicketPaid.setOnClickListener {
+                startActivity(Intent(requireContext(), ListTicketActivity::class.java)
+                    .putExtra("status", "paid"))
+            }
+        }
+    }
 
     private fun getTicket(search: String) {
         if (isAdded) {
-            rvTicket = requireView().findViewById(R.id.tvTicketNew)
 
             ApiClient.instances.getTickets(search)
                 .enqueue(object : Callback<Model.ResponseModel> {
@@ -49,9 +73,14 @@ class HomeFragment : Fragment(), TicketAdapter.IUserRecycler {
                         val responseBody = response.body()
                         val message = responseBody?.message
                         val data = responseBody?.data
+                        val total = responseBody?.total
+                        val totalPaid = responseBody?.total_paid
 
                         if (response.isSuccessful && message == "Success" && isAdded) {
                             Log.e(requireContext().toString(), "onResponse: $response")
+
+                            tvSaleCount.text = total.toString()
+                            tvPaidCount.text = totalPaid.toString()
 
                             val adapterNewProduct =
                                 data?.let { TicketAdapter("home", it, this@HomeFragment) }

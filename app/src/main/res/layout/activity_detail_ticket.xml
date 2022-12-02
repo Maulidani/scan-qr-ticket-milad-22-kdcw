@@ -161,14 +161,25 @@
                 android:textColor="@color/white"
                 app:layout_constraintTop_toBottomOf="@id/tvTshirtType" />
 
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/imgCopy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_content_copy"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tvTicketLink" />
+
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/tvTicketLink"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
+                android:layout_marginEnd="12dp"
                 android:gravity="left"
                 android:text="https://shfukes.fnksr"
                 android:textColor="@color/white"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toLeftOf="@+id/imgCopy"
                 app:layout_constraintTop_toBottomOf="@id/tvTshirtSize" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -181,8 +192,8 @@
         android:layout_marginTop="12dp"
         android:backgroundTint="@color/forth"
         android:text="Chat wa"
-        android:textColor="@color/black"
         android:textAllCaps="false"
+        android:textColor="@color/black"
         app:cornerRadius="12dp"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/cardDetailTicket" />
