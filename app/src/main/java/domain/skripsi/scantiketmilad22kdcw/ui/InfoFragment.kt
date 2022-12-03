@@ -20,8 +20,7 @@ class InfoFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        Toast.makeText(requireContext(), "Info", Toast.LENGTH_SHORT).show()
+        //
     }
 
 }

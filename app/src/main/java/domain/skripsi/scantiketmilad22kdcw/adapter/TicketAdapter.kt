@@ -61,8 +61,8 @@ class TicketAdapter(
                     ticketStatus.setTextColor(Color.RED)
                 }
             }
-            fullName.text = list.customer_name
-            nra.text = list.customer_nra
+            fullName.text = "Nama : " + list.customer_name
+            nra.text = "NRA : " + list.customer_nra
             campus.text = "KD : " + list.customer_campus
 
             item.setOnClickListener {
@@ -108,7 +108,8 @@ class TicketAdapter(
                             for (i in 0..optionsEdit!!.size) {
                                 when (whichEdit) {
                                     i -> {
-                                        val idStatusTicket = optionsEdit[i].split(".").toTypedArray()
+                                        val idStatusTicket =
+                                            optionsEdit[i].split(".").toTypedArray()
                                         editPesanan(list.id, idStatusTicket[0])
                                     }
                                 }
@@ -117,19 +118,19 @@ class TicketAdapter(
                         val dialogEdit: AlertDialog = builderEdit.create()
                         dialogEdit.show()
                     }
-                    3 -> {
-//                        val builder = AlertDialog.Builder(itemView.context)
-//                        builder.setTitle("Hapus")
-//                        builder.setMessage("Hapus tiket ${list.customer_name} ?")
-//
-//                        builder.setPositiveButton("Ya") { _, _ ->
-//                            delete(list.id)
-//                        }
-//
-//                        builder.setNegativeButton("Tidak") { _, _ ->
-//                            // cancel
-//                        }
-//                        builder.show()
+                    2 -> {
+                        val builder = AlertDialog.Builder(itemView.context)
+                        builder.setTitle("Hapus")
+                        builder.setMessage("Hapus tiket ${list.customer_name} ?")
+
+                        builder.setPositiveButton("Ya") { _, _ ->
+                            deletePesanan(list.id)
+                        }
+
+                        builder.setNegativeButton("Tidak") { _, _ ->
+                            // cancel
+                        }
+                        builder.show()
                     }
                 }
             }
@@ -154,7 +155,48 @@ class TicketAdapter(
 
                             Toast.makeText(
                                 itemView.context,
-                                "Berhasil ganti pesanan",
+                                "Berhasil ganti status pesanan",
+                                Toast.LENGTH_SHORT
+                            ).show()
+
+                            mListener.refreshView(true)
+                            notifyDataSetChanged()
+
+                        } else {
+                            Log.e(itemView.context.toString(), "onResponse: $response")
+
+                            Toast.makeText(itemView.context, "Gagal", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                    }
+
+                    override fun onFailure(call: Call<Model.ResponseModel>, t: Throwable) {
+                        Log.e(itemView.context.toString(), "onFailure: ${t.message}")
+
+                        Toast.makeText(itemView.context, "Terjadi Kesalahan", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+
+                })
+        }
+
+        private fun deletePesanan(ticketId: String) {
+
+            ApiClient.instances.deleteTicket(ticketId)
+                .enqueue(object : Callback<Model.ResponseModel> {
+                    override fun onResponse(
+                        call: Call<Model.ResponseModel>,
+                        response: Response<Model.ResponseModel>
+                    ) {
+                        val responseBody = response.body()
+                        val message = responseBody?.message
+
+                        if (response.isSuccessful && message == "Success") {
+                            Log.e(itemView.context.toString(), "onResponse: $response")
+
+                            Toast.makeText(
+                                itemView.context,
+                                "Berhasil hapus pesanan",
                                 Toast.LENGTH_SHORT
                             ).show()
 
@@ -192,10 +234,10 @@ class TicketAdapter(
 
     override fun getItemCount(): Int {
         return if (_type == "home") {
-            if (list.size <= 6) {
+            if (list.size <= 3) {
                 list.size
             } else {
-                6
+                3
             }
 
         } else {

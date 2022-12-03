@@ -50,24 +50,39 @@ class DetailTicketActivity : AppCompatActivity() {
                 ticketLink.text = BASE_URL + "/" + intent.getStringExtra("url")
             }
             else -> {
-                ticketLink.text = "-"
+                ticketLink.text = "Tiket : -"
 
                 ticketStatus.text = "Belum bayar"
                 ticketStatus.setTextColor(Color.RED)
             }
         }
+
         ticketNumber.text = "#" + intent.getStringExtra("id")
         ticketType.text = intent.getStringExtra("ticket")
-        fullName.text = intent.getStringExtra("customer_name")
-        nra.text = intent.getStringExtra("customer_nra")
-        campus.text = intent.getStringExtra("customer_campus")
-        phone.text = intent.getStringExtra("customer_phone")
-        email.text = intent.getStringExtra("customer_email")
-        address.text = intent.getStringExtra("customer_address")
+        fullName.text = "Nama : " + intent.getStringExtra("customer_name")
+        nra.text = "NRA : " + intent.getStringExtra("customer_nra")
+        campus.text = "KD : " + intent.getStringExtra("customer_campus")
+        phone.text = "Telp. : " + intent.getStringExtra("customer_phone")
+        email.text = "Email : " + intent.getStringExtra("customer_email")
+        address.text = "Alamat : " + intent.getStringExtra("customer_address")
 
-        tshirt.text = intent.getStringExtra("merchandise")
-        tshirtType.visibility = View.GONE
-        tshirtSize.visibility = View.GONE
+        if (intent.getStringExtra("merchandise") != null) {
+            val tshirtData = intent.getStringExtra("merchandise")?.split(",")?.toTypedArray()
+
+            if (intent.getStringExtra("ticket") == "Silver") {
+                tshirt.text = "Warna Baju : -"
+                tshirtType.text = "Lengan Baju : -"
+                tshirtSize.text = "Ukuran Baju : -"
+            } else {
+                tshirt.text = "Warna Baju : " + tshirtData!![0]
+                tshirtType.text = "Lengan Baju : " + tshirtData[1]
+                tshirtSize.text = "Ukuran Baju : " + tshirtData[2]
+            }
+        } else {
+            tshirt.text = "Warna Baju : -"
+            tshirtType.text = "Lengan Baju : -"
+            tshirtSize.text = "Ukuran Baju : -"
+        }
 
         imgBack.setOnClickListener {
             finish()
@@ -79,10 +94,15 @@ class DetailTicketActivity : AppCompatActivity() {
             val clipData = ClipData.newPlainText("Link ticket", textToCopy)
             clipboardManager.setPrimaryClip(clipData)
 
-            Toast.makeText(applicationContext, "Text copied to clipboard", Toast.LENGTH_SHORT)
+            Toast.makeText(
+                applicationContext,
+                "Link ticket copied to clipboard",
+                Toast.LENGTH_SHORT
+            )
                 .show()
-
         }
+
+        btnChat.visibility = View.INVISIBLE
 
     }
 

@@ -5,6 +5,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.cardview.widget.CardView
@@ -17,6 +19,7 @@ import com.budiyev.android.codescanner.CodeScannerView
 import com.budiyev.android.codescanner.DecodeCallback
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.textfield.TextInputEditText
 import domain.skripsi.scantiketmilad22kdcw.R
 import domain.skripsi.scantiketmilad22kdcw.adapter.TicketAdapter
 import domain.skripsi.scantiketmilad22kdcw.model.Model
@@ -31,8 +34,11 @@ class ScannerFragment : Fragment() {
     private lateinit var codeScanner: CodeScanner
     private lateinit var pbLoading: ProgressBar
     private lateinit var cardAttendManual: CardView
+    private lateinit var inputNra: TextInputEditText
+    private lateinit var inputCampus: AutoCompleteTextView
     private lateinit var btnAttendManual: MaterialButton
     private lateinit var fabCardAttendManual: FloatingActionButton
+    private val dataCampus = arrayListOf("dipa", "umi")
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -45,33 +51,61 @@ class ScannerFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val scannerView: CodeScannerView = requireActivity().findViewById(R.id.scanner)
-        pbLoading = requireActivity().findViewById(R.id.pbLoading)
-        fabCardAttendManual = requireActivity().findViewById(R.id.fabCardAttendManual)
-        cardAttendManual = requireActivity().findViewById(R.id.cardAttendManual)
-        btnAttendManual = requireActivity().findViewById(R.id.btnAttendManual)
+        if (isAdded) {
+            val scannerView: CodeScannerView = requireView().findViewById(R.id.scanner)
+            pbLoading = requireView().findViewById(R.id.pbLoading)
+            fabCardAttendManual = requireView().findViewById(R.id.fabCardAttendManual)
+            cardAttendManual = requireView().findViewById(R.id.cardAttendManual)
+            cardAttendManual = requireView().findViewById(R.id.cardAttendManual)
+            inputNra = requireView().findViewById(R.id.inputNra)
+            inputCampus = requireView().findViewById(R.id.inputCampus)
+            btnAttendManual = requireView().findViewById(R.id.btnAttendManual)
 
-        cardAttendManual.visibility = View.GONE
+            cardAttendManual.visibility = View.GONE
 
-        codeScanner = CodeScanner(requireContext().applicationContext, scannerView)
+            codeScanner = CodeScanner(requireContext().applicationContext, scannerView)
 
-        codeScanner.decodeCallback = DecodeCallback { result ->
+            codeScanner.decodeCallback = DecodeCallback { result ->
+                if (isAdded) {
+                    requireActivity().runOnUiThread(Runnable {
+                        scanAttend(result.text)
+                    })
+                }
+            }
 
-            requireActivity().runOnUiThread(Runnable {
-                scanAttend(result.text)
-            })
+            val arrayDateAdapter = ArrayAdapter(
+                requireContext(),
+                com.google.android.material.R.layout.support_simple_spinner_dropdown_item,
+                dataCampus
+            )
+            inputCampus.setAdapter(arrayDateAdapter)
 
-        }
+            scannerView.setOnClickListener { codeScanner.startPreview() }
 
-        scannerView.setOnClickListener { codeScanner.startPreview() }
+            fabCardAttendManual.setOnClickListener {
+                if (isAdded) {
+                    if (cardAttendManual.isVisible) {
+                        fabCardAttendManual.setImageResource(R.drawable.ic_arrow_up)
+                        cardAttendManual.visibility = View.GONE
+                    } else {
+                        fabCardAttendManual.setImageResource(R.drawable.ic_arrow_down)
+                        cardAttendManual.visibility = View.VISIBLE
+                    }
+                }
+            }
 
-        fabCardAttendManual.setOnClickListener {
-            if (cardAttendManual.isVisible) {
-                fabCardAttendManual.setImageResource(R.drawable.ic_arrow_up)
-                cardAttendManual.visibility = View.GONE
-            } else {
-                fabCardAttendManual.setImageResource(R.drawable.ic_arrow_down)
-                cardAttendManual.visibility = View.VISIBLE
+            btnAttendManual.setOnClickListener {
+                if (isAdded) {
+                    if (inputNra.text.toString().isNotEmpty() && inputCampus.text.toString()
+                            .isNotEmpty()
+                    ) {
+                        val ticketData =
+                            inputNra.text.toString() + "," + inputCampus.text.toString()
+                        scanAttend(ticketData)
+                    } else {
+                        Toast.makeText(requireContext(), "Lengkapi data", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
         }
 
@@ -79,7 +113,9 @@ class ScannerFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        codeScanner.startPreview()
+        if (isAdded) {
+            codeScanner.startPreview()
+        }
     }
 
     override fun onPause() {
@@ -121,18 +157,18 @@ class ScannerFragment : Fragment() {
                         val ticket = responseBody?.ticket
 
                         if (response.isSuccessful && message == "Success" && isAdded) {
-                            Log.e(requireContext().toString(), "onResponse: $response")
+                            Log.e(requireView().toString(), "onResponse: $response")
 
                             ticket?.customer_name?.let { showDialog(message, it) }
 
                         } else if (message == "Attend") {
-                            Log.e(requireContext().toString(), "onResponse: $response")
+                            Log.e(requireView().toString(), "onResponse: $response")
 
                             Toast.makeText(requireContext(), "Sudah hadir", Toast.LENGTH_SHORT)
                                 .show()
 
                         } else {
-                            Log.e(requireContext().toString(), "onResponse: $response")
+                            Log.e(requireView().toString(), "onResponse: $response")
 
                             showDialog("Failed", "")
                         }
@@ -143,7 +179,7 @@ class ScannerFragment : Fragment() {
                     }
 
                     override fun onFailure(call: Call<Model.ResponseModel>, t: Throwable) {
-                        Log.e(requireContext().toString(), "onFailure: ${t.message}")
+                        Log.e(requireView().toString(), "onFailure: ${t.message}")
 
                         Toast.makeText(requireContext(), "Terjadi kesalahan", Toast.LENGTH_SHORT)
                             .show()

@@ -26,6 +26,7 @@ class HomeFragment : Fragment(), TicketAdapter.IUserRecycler {
     private lateinit var cardTicketPaid: CardView
     private lateinit var tvSaleCount: TextView
     private lateinit var tvPaidCount: TextView
+    private lateinit var tvSeeAll: TextView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,34 +38,34 @@ class HomeFragment : Fragment(), TicketAdapter.IUserRecycler {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        init()
-        getTicket("")
+        if (isAdded) {
+            init()
+            getTicket()
+        }
     }
 
-    private fun init(){
+    private fun init() {
         if (isAdded) {
-            rvTicket = requireView().findViewById(R.id.tvTicketNew)
+            rvTicket = requireView().findViewById(R.id.rvTicketNew)
             tvSaleCount = requireView().findViewById(R.id.tvSale)
             tvPaidCount = requireView().findViewById(R.id.tvPaid)
             cardTicketSale = requireView().findViewById(R.id.cardTicketSale)
             cardTicketPaid = requireView().findViewById(R.id.cardTicketPaid)
+            tvSeeAll = requireView().findViewById(R.id.tvSeeAll)
 
-            cardTicketSale.setOnClickListener {
-                startActivity(Intent(requireContext(), ListTicketActivity::class.java)
-                    .putExtra("status", "sale"))
-            }
-            cardTicketPaid.setOnClickListener {
-                startActivity(Intent(requireContext(), ListTicketActivity::class.java)
-                    .putExtra("status", "paid"))
+            tvSeeAll.setOnClickListener {
+                startActivity(
+                    Intent(requireContext(), ListTicketActivity::class.java)
+                        .putExtra("status", "all")
+                )
             }
         }
     }
 
-    private fun getTicket(search: String) {
+    private fun getTicket() {
         if (isAdded) {
 
-            ApiClient.instances.getTickets(search)
+            ApiClient.instances.getTickets("", "")
                 .enqueue(object : Callback<Model.ResponseModel> {
                     override fun onResponse(
                         call: Call<Model.ResponseModel>,
@@ -76,28 +77,30 @@ class HomeFragment : Fragment(), TicketAdapter.IUserRecycler {
                         val total = responseBody?.total
                         val totalPaid = responseBody?.total_paid
 
-                        if (response.isSuccessful && message == "Success" && isAdded) {
-                            Log.e(requireContext().toString(), "onResponse: $response")
+                        if (isAdded) {
+                            if (response.isSuccessful && message == "Success") {
+                                Log.e(requireView().toString(), "onResponse: $response")
 
-                            tvSaleCount.text = total.toString()
-                            tvPaidCount.text = totalPaid.toString()
+                                tvSaleCount.text = total.toString()
+                                tvPaidCount.text = totalPaid.toString()
 
-                            val adapterNewProduct =
-                                data?.let { TicketAdapter("home", it, this@HomeFragment) }
-                            rvTicket.layoutManager = LinearLayoutManager(requireActivity())
-                            rvTicket.adapter = adapterNewProduct
+                                val adapterNewProduct =
+                                    data?.let { TicketAdapter("home", it, this@HomeFragment) }
+                                rvTicket.layoutManager = LinearLayoutManager(requireActivity())
+                                rvTicket.adapter = adapterNewProduct
 
-                        } else {
-                            Log.e(requireContext().toString(), "onResponse: $response")
+                            } else {
+                                Log.e(requireView().toString(), "onResponse: $response")
 
-                            Toast.makeText(requireContext(), "Gagal", Toast.LENGTH_SHORT)
-                                .show()
+                                Toast.makeText(requireContext(), "Gagal", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
                         }
 
                     }
 
                     override fun onFailure(call: Call<Model.ResponseModel>, t: Throwable) {
-                        Log.e(requireContext().toString(), "onFailure: ${t.message}")
+                        Log.e(requireView().toString(), "onFailure: ${t.message}")
 
                         Toast.makeText(requireContext(), "Terjadi kesalahan", Toast.LENGTH_SHORT)
                             .show()
@@ -110,7 +113,7 @@ class HomeFragment : Fragment(), TicketAdapter.IUserRecycler {
 
     override fun refreshView(onUpdate: Boolean) {
         if (isAdded && onUpdate) {
-            getTicket("")
+            getTicket()
         }
     }
 

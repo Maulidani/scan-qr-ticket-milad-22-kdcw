@@ -50,15 +50,15 @@ class HomeActivity : AppCompatActivity() {
                             Toast.LENGTH_SHORT
                         ).show()
                     } else {
-                        val animation =
-                            AnimationUtils.loadAnimation(this, R.anim.fade_out_bottom_nav)
+//                        val animation =
+//                            AnimationUtils.loadAnimation(this, R.anim.fade_out_bottom_nav)
 
                         CoroutineScope(Dispatchers.Main).launch {
                             loadFragment(ScannerFragment())
-                            delay(150)
-                            bottomNav.startAnimation(animation)
-                            delay(600)
-                            bottomNav.visibility = View.GONE
+//                            delay(150)
+//                            bottomNav.startAnimation(animation)
+//                            delay(600)
+//                            bottomNav.visibility = View.GONE
                         }
                     }
                 }
@@ -92,16 +92,16 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
-    override fun onBackPressed() {
-
-        if (bottomNav.isVisible) {
-            super.onBackPressed()
-        } else {
-            loadFragment(HomeFragment())
-            bottomNav.visibility = View.VISIBLE
-            bottomNav.itemActiveIndex = 0
-        }
-
-    }
+//    override fun onBackPressed() {
+//
+//        if (bottomNav.isVisible) {
+//            super.onBackPressed()
+//        } else {
+//            loadFragment(HomeFragment())
+//            bottomNav.visibility = View.VISIBLE
+//            bottomNav.itemActiveIndex = 0
+//        }
+//
+//    }
 
 }

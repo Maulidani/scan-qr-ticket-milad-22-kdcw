@@ -12,6 +12,7 @@ interface ApiService {
     @POST("get-tickets")
     fun getTickets(
         @Field("search") search: String,
+        @Field("status") status: String, //pending,paid,attend
     ): Call<Model.ResponseModel>
 
     @FormUrlEncoded
@@ -19,6 +20,12 @@ interface ApiService {
     fun editTicket(
         @Field("ticket_id") ticketId: String,
         @Field("status_id") statusId: String,
+    ): Call<Model.ResponseModel>
+
+    @FormUrlEncoded
+    @POST("delete-ticket")
+    fun deleteTicket(
+        @Field("ticket_id") ticketId: String,
     ): Call<Model.ResponseModel>
 
     @FormUrlEncoded
@@ -34,8 +41,7 @@ interface ApiService {
     @FormUrlEncoded
     @POST("login")
     fun login(
-        @Field("username") username: String,
-        @Field("campus") campus: String,
+        @Field("password") password: String,
     ): Call<Model.ResponseModel>
 
 }
