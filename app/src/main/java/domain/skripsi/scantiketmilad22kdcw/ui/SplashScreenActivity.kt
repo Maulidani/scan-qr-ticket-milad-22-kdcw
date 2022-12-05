@@ -29,8 +29,8 @@ class SplashScreenActivity : AppCompatActivity() {
         sharedPref = PreferencesHelper(applicationContext)
 
         CoroutineScope(Dispatchers.Main).launch {
+//            delay(2000)
             getDatas()
-            delay(2000)
 
         }
     }
@@ -88,7 +88,7 @@ class SplashScreenActivity : AppCompatActivity() {
 //                            Log.e(ContentValues.TAG, i.split(",").toTypedArray().joinToString())
 //                        }
 
-                        startActivity(Intent(this@SplashScreenActivity, HomeActivity::class.java))
+                        startActivity(Intent(this@SplashScreenActivity, LoginActivity::class.java))
                         finish()
 
                     } else {
